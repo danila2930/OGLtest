@@ -21,11 +21,45 @@ struct Coord {
 
 
 int updateGrid(std::vector<Coord>& cords) {
+    std::vector<Coord> tempCords = cords;
+
     for (int i = 0; i < ROWS; ++i) {
         for (int j = 0; j < COLS; ++j) {
             
         }
     }
+    //1111
+    for (int i = 0; i < ROWS; ++i) {
+        for (int j = 0; j < COLS; ++j) {
+            int liveNeighbors = 0;
+            // Перевіряємо всіх сусідів клітки
+            for (int di = -1; di <= 1; ++di) {
+                for (int dj = -1; dj <= 1; ++dj) {
+                    if (di == 0 && dj == 0) continue; // Пропускаємо поточну клітинку
+
+                    int ni = (i + di + ROWS) % ROWS;
+                    int nj = (j + dj + COLS) % COLS;
+
+                    if (cords[ni * COLS + nj].alive)
+                        liveNeighbors++;
+                }
+            }
+
+            // Застосовуємо правила гри
+            int index = i * COLS + j;
+            if (cords[index].alive && (liveNeighbors < 2 || liveNeighbors > 3)) {
+                tempCords[index].alive = false;
+            }
+            else if (!cords[index].alive && liveNeighbors == 3) {
+                tempCords[index].alive = true;
+            }
+            // Якщо жодне правило не застосовується, стан клітинки не змінюється,
+            // тому немає потреби оновлювати tempCords[index].alive
+        }
+    }
+    //1111
+
+    cords = tempCords;
     return 0;
 }
 
@@ -90,7 +124,7 @@ int main(void)
     /* Loop until the user closes the window */
     std::vector<Coord> cords;
 
-    std::vector<int> myList(64);
+    std::vector<int> myList(1);
     for (int i = 0; i < ROWS; ++i) {
         for (int j = 0; j < COLS; ++j) {
             cords.push_back({ i, j, false, myList });
