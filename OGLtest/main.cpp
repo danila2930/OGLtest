@@ -1,6 +1,6 @@
 #include <GLFW/glfw3.h>
 #include <math.h>
-
+#include <cmath>
 #include <stdlib.h>
 
 #include <iostream>
@@ -55,29 +55,10 @@ int drawKvad(GLFWwindow* window, int cordX, int cordY, int size) {
     glColor3f(1.0f, 0.0f, 0.0f);
     glBegin(GL_QUADS);
     glVertex2f(x, y);
-    glVertex2f(x + 0.05f / size, y-0.03f / size);
-    glVertex2f(x + 0.05f / size, y-0.07f / size);
-    glVertex2f(x, y-0.04f / size);
+    glVertex2f(x , y - 0.0020f * size);
+    glVertex2f(x + 0.0020f * size, y- 0.0020f * size);
+    glVertex2f(x+ 0.0020f * size, y);
     glEnd();
-
-    glColor3f(1.0f, 1.0f, 0.0f);
-    glBegin(GL_QUADS);
-    glVertex2f(x+ 0.1f / size, y);
-    glVertex2f(x + 0.05f / size, y - 0.03f / size);
-    glVertex2f(x + 0.05f / size, y - 0.07f / size);
-    glVertex2f(x + 0.1f / size, y - 0.04f / size);
-    glEnd();
-
-    glColor3f(0.0f, 1.0f, 0.0f);
-    glBegin(GL_QUADS);
-    glVertex2f(x + 0.1f / size, y);
-    glVertex2f(x + 0.05f / size, y - 0.03f / size);
-    glVertex2f(x, y);
-    glVertex2f(x+0.05f / size, y+0.03f / size);
-    glEnd();
-
-
-
     return 0;
 }
 
@@ -125,6 +106,7 @@ int main(void)
         }
         
     }
+    int size = 3;
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -138,8 +120,8 @@ int main(void)
             for (int j = 0; j < COLS; ++j) {
                 currentGrid[i][j] = nextGrid[i][j];
                 if (currentGrid[i][j] == 1) {
-                    int size = 15;
-                    drawKvad(window, ((i * 25 - j * 25)/ size + 500.0f), ((j * -15 + i * -15) / size + 800), size);
+                    
+                    drawKvad(window, i * size + 50, j * size + 50, size);
 
                 }
             }
