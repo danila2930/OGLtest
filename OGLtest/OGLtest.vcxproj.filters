@@ -19,9 +19,4 @@
       <Filter>Header Files</Filter>
     </ClCompile>
   </ItemGroup>
-  <ItemGroup>
-    <Text Include="gameoflife.txt" />
-    <Text Include="test1.txt" />
-    <Text Include="test2.txt" />
-  </ItemGroup>
 </Project>

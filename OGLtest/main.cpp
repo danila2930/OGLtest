@@ -7,7 +7,7 @@
 #include <vector>
 #include <random>
 
-
+//3d
 
 const double PI = 3.14159265358979323846;
 
@@ -111,7 +111,7 @@ int main(void)
     for (int i = 0; i < 100000; i++)
     {
         cords.push_back({ 500, 200 , 90 });
-        int curnum = rand() % 100000;
+        int curnum = rand() % 10000000;
         while (true)
         {
             Coord lastCoord = cords.back();
