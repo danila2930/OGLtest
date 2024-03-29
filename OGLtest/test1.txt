@@ -1,0 +1,119 @@
+#include <GLFW/glfw3.h>
+#include <math.h>
+#include <stdlib.h>
+#include <iostream>
+#include <vector>
+#include <random>
+
+const int ROWS = 300; // Кількість рядків
+const int COLS = 300; // Кількість стовпців
+
+void updateGrid(std::vector<int> current[ROWS][COLS], std::vector<int> next[ROWS][COLS]) {
+    for (int i = 0; i < ROWS; ++i) {
+        for (int j = 0; j < COLS; ++j) {
+            int liveNeighbors = 0;
+            // Перевіряємо всіх сусідів клітки
+            for (int di = -1; di <= 1; ++di) {
+                for (int dj = -1; dj <= 1; ++dj) {
+                    if (di == 0 && dj == 0) continue; // Пропускаємо поточну клітинку
+
+                    // Використовуємо модульну арифметику для обчислення індексів
+                    int ni = (i + di + ROWS) % ROWS;
+                    int nj = (j + dj + COLS) % COLS;
+
+                    // Перевіряємо лише перше значення в векторі, якщо воно існує
+                    if (!current[ni][nj].empty() && current[ni][nj][0] == 1) {
+                        liveNeighbors++;
+                    }
+                }
+            }
+            // Застосовуємо правила гри
+            if (!current[i][j].empty() && current[i][j][0] == 1 && (liveNeighbors < 2 || liveNeighbors > 3)) {
+                next[i][j].clear(); // Очищуємо вектор
+                next[i][j].push_back(0); // Додаємо 0, як позначення мертвої клітини
+            }
+            else if ((current[i][j].empty() || current[i][j][0] == 0) && liveNeighbors == 3) {
+                next[i][j].clear(); // Очищуємо вектор
+                next[i][j].push_back(1); // Додаємо 1, як позначення живої клітини
+            }
+            else {
+                next[i][j] = current[i][j]; // Копіюємо стан клітини
+            }
+        }
+    }
+}
+
+int drawKvad(GLFWwindow* window, int cordX, int cordY, int size) {
+    int windowWidth, windowHeight;
+    glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
+
+    float x = (cordX / (float)windowWidth) * 2.0f - 1.0f;
+    float y = (cordY / (float)windowHeight) * 2.0f - 1.0f;
+
+    glColor3f(1.0f, 0.0f, 0.0f);
+    glBegin(GL_QUADS);
+    glVertex2f(x, y);
+    glVertex2f(x, y - 0.0020f * size);
+    glVertex2f(x + 0.0020f * size, y - 0.0020f * size);
+    glVertex2f(x + 0.0020f * size, y);
+    glEnd();
+    return 0;
+}
+
+int main(void) {
+    GLFWwindow* window;
+
+    if (!glfwInit())
+        return -1;
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    window = glfwCreateWindow(1000, 1000, "Hello World", NULL, NULL);
+
+    if (!window) {
+        glfwTerminate();
+        return -1;
+    }
+
+    glfwMakeContextCurrent(window);
+
+    std::vector<int> currentGrid[ROWS][COLS];
+    std::vector<int> nextGrid[ROWS][COLS];
+
+    for (int i = 0; i < ROWS; ++i) {
+        for (int j = 0; j < COLS; ++j) {
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_int_distribution<> dis(1, 2);
+
+            int random_number = dis(gen);
+            if (random_number == 1) {
+                currentGrid[i][j].push_back(1); // Заповнюємо випадково живими клітинами
+            }
+            else {
+                currentGrid[i][j].push_back(0); // Або мертвими клітинами
+            }
+        }
+    }
+    int size = 3; // Розмір кожної клітинки
+    /* Loop until the user closes the window */
+    while (!glfwWindowShouldClose(window)) {
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        updateGrid(currentGrid, nextGrid);
+        for (int i = 0; i < ROWS; ++i) {
+            for (int j = 0; j < COLS; ++j) {
+                currentGrid[i][j] = nextGrid[i][j]; // Оновлюємо стан сітки
+                if (!currentGrid[i][j].empty() && currentGrid[i][j][0] == 1) {
+                    // Малюємо живу клітинку
+                    drawKvad(window, i * size + 50, j * size + 50, size);
+                }
+            }
+        }
+
+        glfwSwapBuffers(window); // Обмін буферів
+        glfwPollEvents(); // Обробка подій вводу/виводу
+    }
+
+    glfwTerminate(); // Завершення роботи GLFW
+    return 0;
+}
+

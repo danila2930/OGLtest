@@ -11,12 +11,8 @@
 
 const double PI = 3.14159265358979323846;
 
-struct Coord {
-    float x;
-    float y;
-    float rot;
-};
-
+const int ROWS = 10000;
+const int COLS = 2;
 
 int drawLine(GLFWwindow* window, int StartX, int StartY, int EndX, int EndY) {
     int windowWidth, windowHeight;
@@ -37,24 +33,24 @@ int drawLine(GLFWwindow* window, int StartX, int StartY, int EndX, int EndY) {
     return 0;
 }
 
-int calculate(GLFWwindow* window, std::vector<Coord>& cords, int StartX, int StartY, float rotate, int curentnum) {
+int calculate(GLFWwindow* window , int cords[ROWS][COLS], int StartX, int StartY, float rotate, int curentnum) {
 
     int windowWidth = 1000, windowHeight = 1000;
     float x = (StartX / (float)windowWidth) * 2.0f - 1.0f;
     float y = (StartY / (float)windowHeight) * 2.0f - 1.0f;
-
+    
     float EndX = 0;
     float EndY = 0;
-    float size = 5;
+    float size = 25;
     float radians = rotate * PI / 180.0;
 
     if (curentnum % 2 == 0) {
         curentnum = curentnum / 2;
 
-        rotate -= 11;
+        rotate -= 15;
         EndX = StartX + size * cos(radians);
         EndY = StartY + size * sin(radians);
-
+        
 
     }
 
@@ -62,23 +58,23 @@ int calculate(GLFWwindow* window, std::vector<Coord>& cords, int StartX, int Sta
     {
         curentnum = curentnum * 3 + 1;
 
-        rotate += 18;
+        rotate += 15;
 
         EndX = StartX + size * cos(radians);
         EndY = StartY + size * sin(radians);
-
+        
     }
 
-    cords.push_back({ EndX, EndY, rotate });
+    
 
 
-    /*if (curentnum != 2) {
-        calculate(window, cords, EndX, EndY, rotate, curentnum, step);
-    }*/
+    if (curentnum != 2) {
+        calculate(window, cords, EndX, EndY, rotate, curentnum);
+    }
 
-    return curentnum;
+    return EndX, EndY, curentnum, rotate;
 
-
+    
 }
 
 
@@ -103,32 +99,11 @@ int main(void)
 
     glfwMakeContextCurrent(window);
 
+    
+    int cords[ROWS][COLS] = { {0} };
 
-    std::vector<Coord> cords;
 
-
-
-    for (int i = 0; i < 100000; i++)
-    {
-        cords.push_back({ 500, 200 , 90 });
-        int curnum = rand() % 100000;
-        while (true)
-        {
-            Coord lastCoord = cords.back();
-            float lastX = lastCoord.x;
-            float lastY = lastCoord.y;
-            float lastrot = lastCoord.rot;
-            if (curnum < 4) {
-                break;
-            }
-            else
-            {
-                curnum = calculate(window, cords, lastX, lastY, lastrot, curnum);
-            }
-        }
-
-    }
-
+    calculate(window, cords, 500, 200, 90, rand() % 100);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -138,17 +113,10 @@ int main(void)
 
 
 
-        for (size_t i = 0; i < cords.size() - 1; ++i) { // Итерируем до предпоследнего элемента
-            Coord currentCoord = cords[i]; // Текущая пара координат
-            Coord nextCoord = cords[i + 1]; // Следующая пара координат
-            if (nextCoord.x != 500)
-            {
-                drawLine(window, currentCoord.x, currentCoord.y, nextCoord.x, nextCoord.y);
-            }
-            // Ваш код здесь: работа с currentCoord и nextCoord
-        }
-
-
+        
+        
+            
+        
 
         glfwSwapBuffers(window);
         glfwPollEvents();
