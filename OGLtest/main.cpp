@@ -8,42 +8,29 @@
 #include <random>
 
 
-const int ROWS = 400; // Количество строк
-const int COLS = 400; // Количество столбцов
+const int ROWS = 200; // Количество строк
+const int COLS = 200; // Количество столбцов
+
+struct Coord {
+    int x;
+    int y;
+    bool alive;
+    std::vector<int> gen;
+};
 
 
-void updateGrid(int current[ROWS][COLS], int next[ROWS][COLS]) {
+
+int updateGrid(std::vector<Coord>& cords) {
     for (int i = 0; i < ROWS; ++i) {
         for (int j = 0; j < COLS; ++j) {
-            int liveNeighbors = 0;
-            // Перевіряємо всіх сусідів клітки
-            for (int di = -1; di <= 1; ++di) {
-                for (int dj = -1; dj <= 1; ++dj) {
-                    if (di == 0 && dj == 0) continue; // Пропускаємо поточну клітинку
-
-                    // Використовуємо модульну арифметику для обчислення індексів
-                    int ni = (i + di + ROWS) % ROWS;
-                    int nj = (j + dj + COLS) % COLS;
-
-                    liveNeighbors += current[ni][nj];
-                }
-            }
-            // Застосовуємо правила гри
-            if (current[i][j] == 1 && (liveNeighbors < 2 || liveNeighbors > 3)) {
-                next[i][j] = 0;
-            }
-            else if (current[i][j] == 0 && liveNeighbors == 3) {
-                next[i][j] = 1;
-            }
-            else {
-                next[i][j] = current[i][j];
-            }
+            
         }
     }
+    return 0;
 }
 
 
-int drawKvad(GLFWwindow* window, int cordX, int cordY, int size) {
+int drawKvad(GLFWwindow* window, int cordX, int cordY, int size, bool live) {
     int windowWidth, windowHeight;
     glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
 
@@ -51,32 +38,15 @@ int drawKvad(GLFWwindow* window, int cordX, int cordY, int size) {
     float y = (cordY / (float)windowHeight) * 2.0f - 1.0f;
 
     
-
-    glColor3f(1.0f, 0.0f, 0.0f);
-    glBegin(GL_QUADS);
-    glVertex2f(x, y);
-    glVertex2f(x + 0.05f / size, y-0.03f / size);
-    glVertex2f(x + 0.05f / size, y-0.07f / size);
-    glVertex2f(x, y-0.04f / size);
-    glEnd();
-
-    glColor3f(1.0f, 1.0f, 0.0f);
-    glBegin(GL_QUADS);
-    glVertex2f(x+ 0.1f / size, y);
-    glVertex2f(x + 0.05f / size, y - 0.03f / size);
-    glVertex2f(x + 0.05f / size, y - 0.07f / size);
-    glVertex2f(x + 0.1f / size, y - 0.04f / size);
-    glEnd();
-
-    glColor3f(0.0f, 1.0f, 0.0f);
-    glBegin(GL_QUADS);
-    glVertex2f(x + 0.1f / size, y);
-    glVertex2f(x + 0.05f / size, y - 0.03f / size);
-    glVertex2f(x, y);
-    glVertex2f(x+0.05f / size, y+0.03f / size);
-    glEnd();
-
-
+    if (live) {
+        glColor3f(1.0f, 0.0f, 0.0f);
+        glBegin(GL_QUADS);
+        glVertex2f(x, y);
+        glVertex2f(x + 0.05f / size, y);
+        glVertex2f(x + 0.05f / size, y - 0.05f / size);
+        glVertex2f(x, y - 0.05f / size);
+        glEnd();
+    }
 
     return 0;
 }
@@ -105,45 +75,57 @@ int main(void)
 
     glfwMakeContextCurrent(window);
 
-    int currentGrid[ROWS][COLS] = { {0} };
-    int nextGrid[ROWS][COLS] = { {0} };
+
 
     
 
-    for (int i = 0; i < ROWS; ++i)
-    {
-        for (int j = 0; j < COLS; ++j)
-        {
-            std::random_device rd; // Генератор випадкових чисел
-            std::mt19937 gen(rd()); // Використання Mersenne Twister для генерації чисел
-            std::uniform_int_distribution<> dis(1, 2); // Рівномірний розподіл від 1 до 2
+    //for (int i = 0; i < ROWS; ++i)
+    //{
+    //    for (int j = 0; j < COLS; ++j)
+    //    {
+    //        
+    //    }
+    //    
+    //}
+    /* Loop until the user closes the window */
+    std::vector<Coord> cords;
 
-            int random_number = dis(gen);
-            if (random_number == 1) {
-                currentGrid[i][j] = 1;
+    std::vector<int> myList(64);
+    for (int i = 0; i < ROWS; ++i) {
+        for (int j = 0; j < COLS; ++j) {
+            cords.push_back({ i, j, false, myList });
+        }
+    }
+    for (int i = 1; i < ROWS - 1; i++) {
+        for (int j = 1; j < ROWS - 1; j++) {
+            if (rand() % 2 == 1) {
+                int index = i * COLS + j;
+                cords[index].alive = true;
             }
         }
-        
     }
-    /* Loop until the user closes the window */
+
     while (!glfwWindowShouldClose(window))
     {
         
         glClear(GL_COLOR_BUFFER_BIT);
         
+        
 
-
-        updateGrid(currentGrid, nextGrid);
-        for (int i = 0; i < ROWS; ++i) {
-            for (int j = 0; j < COLS; ++j) {
-                currentGrid[i][j] = nextGrid[i][j];
-                if (currentGrid[i][j] == 1) {
-                    int size = 15;
-                    drawKvad(window, ((i * 25 - j * 25)/ size + 500.0f), ((j * -15 + i * -15) / size + 800), size);
-
-                }
+        
+        updateGrid(cords);
+        int size = 4;
+        for (int i = 0; i < ROWS; ++i)
+        {
+            for (int j = 0; j < COLS; ++j)
+            {
+                int index = i * COLS + j;
+                Coord info = cords[index];
+                drawKvad( window, i * 25 / size, j * 25 / size, size, info.alive);
             }
         }
+
+
 
         glfwSwapBuffers(window);
         glfwPollEvents();
